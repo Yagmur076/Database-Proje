@@ -170,16 +170,16 @@ public class VetDatabaseApp extends JFrame {
 
     private void initVetSchedules() {
         vetDatesMap.put("Dr. Can Öztürk", new String[]{"2026-06-01", "2026-06-03", "2026-06-05"});
-        vetTimesMap.put("Dr. Can Öztürk", new String[]{"09:00:00", "10:30:00", "14:00:00"});
+        vetTimesMap.put("Dr. Can Öztürk", new String[]{"09:00", "10:30", "14:00"});
 
         vetDatesMap.put("Dr. Ayşe Demir", new String[]{"2026-06-02", "2026-06-04", "2026-06-06"});
-        vetTimesMap.put("Dr. Ayşe Demir", new String[]{"11:00:00", "13:30:00", "16:00:00"});
+        vetTimesMap.put("Dr. Ayşe Demir", new String[]{"11:00", "13:30", "16:00"});
 
         vetDatesMap.put("Dr. Mehmet Kaya", new String[]{"2026-06-01", "2026-06-02", "2026-06-07"});
-        vetTimesMap.put("Dr. Mehmet Kaya", new String[]{"08:30:00", "12:00:00", "15:30:00"});
+        vetTimesMap.put("Dr. Mehmet Kaya", new String[]{"08:30", "12:00", "15:30"});
 
         vetDatesMap.put("Dr. Zeynep Çelik", new String[]{"2026-06-03", "2026-06-05", "2026-06-08"});
-        vetTimesMap.put("Dr. Zeynep Çelik", new String[]{"09:30:00", "14:30:00", "17:00:00"});
+        vetTimesMap.put("Dr. Zeynep Çelik", new String[]{"09:30", "14:30", "17:00"});
     }
 
     private void loadVetsToComboBox() {
