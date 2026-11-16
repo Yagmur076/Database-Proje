@@ -1,0 +1,58 @@
+-- 1. Veritabanını oluştur ve seç
+CREATE DATABASE IF NOT EXISTS veteriner_klinigi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE veteriner_klinigi;
+
+-- Varsa eski tabloları ilişkilerine göre temizle
+DROP TABLE IF EXISTS Treatments;
+DROP TABLE IF EXISTS Appointments;
+DROP TABLE IF EXISTS Vet;
+DROP TABLE IF EXISTS Pets;
+
+-- 2. Veterinerler Tablosu
+CREATE TABLE IF NOT EXISTS Vet (
+    vet_id INT NOT NULL PRIMARY KEY,
+    name_surname VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    specialization VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+);
+
+-- Örnek Veteriner Verileri (Arayüzdeki saatlerle uyumlu)
+INSERT INTO Vet (vet_id, name_surname, specialization) VALUES 
+(1, 'Dr. Can Öztürk', 'Surgery'),
+(2, 'Dr. Ayşe Demir', 'Internal Medicine'),
+(3, 'Dr. Mehmet Kaya', 'Dermatology'),
+(4, 'Dr. Zeynep Çelik', 'Dentistry');
+
+-- 3. Evcil Hayvan Sahipleri ve Hastalar (Pets) Tablosu (Kısırlık sütunu dahil)
+CREATE TABLE IF NOT EXISTS Pets (
+    pet_id INT NOT NULL PRIMARY KEY,
+    owner_name VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    owner_phone VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    pet_name VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    species VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    gender TINYINT NOT NULL,
+    is_neutured TINYINT NOT NULL,
+    breed VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+    birth_date DATE NOT NULL
+);
+
+-- 4. Randevular (Appointments) Tablosu
+CREATE TABLE IF NOT EXISTS Appointments (
+    appointment_id INT NOT NULL PRIMARY KEY,
+    pet_id INT NOT NULL,
+    vet_id INT NOT NULL,
+    appointment_date DATE NOT NULL,
+    appointment_time TIME NOT NULL,
+    reason VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    FOREIGN KEY (pet_id) REFERENCES Pets(pet_id),
+    FOREIGN KEY (vet_id) REFERENCES Vet(vet_id)
+);
+
+-- 5. Tedaviler ve Faturalandırma (Treatments) Tablosu (Ücret sütunu dahil)
+CREATE TABLE IF NOT EXISTS Treatments (
+    treatment_id INT NOT NULL PRIMARY KEY,
+    appointment_id INT NOT NULL,
+    exam_type VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    summary VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    cost DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    FOREIGN KEY (appointment_id) REFERENCES Appointments(appointment_id)
+);
