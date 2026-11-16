@@ -1,5 +1,5 @@
 Kullanılacak Uygulamalar:
-  1. MySQL Workbench
+  1. MySQL Workbench (https://youtu.be/5OdVJbNCSso?si=V2nBii6WAR4u8w4v&t=142)
   2. Eclipse
   3. JAR (https://dev.mysql.com/downloads/connector/j/)
      //JAR dosyası için "Platform Independent" operating system gerekli, ZIP olarak indirilinecek (2. seçenek)
