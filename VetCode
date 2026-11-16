@@ -392,17 +392,19 @@ public class VetDatabaseApp extends JFrame {
             int nextApptId = getNextId("Appointments", "appointment_id");
             int nextTreatmentId = getNextId("Treatments", "treatment_id");
 
+            // Sahip Owners tablosunda varsa onu kullan, yoksa yeni sahip oluştur
+            int ownerId = findOrCreateOwner(txtOwnerName.getText().trim(), txtOwnerPhone.getText().trim());
+
             // Pets tablosuna gerçek is_neutured değeri kaydediliyor
-            String sqlPet = "INSERT INTO Pets (pet_id, owner_name, owner_phone, pet_name, species, gender, is_neutured, breed, birth_date) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?)";
+            String sqlPet = "INSERT INTO Pets (pet_id, owner_id, pet_name, species, gender, is_neutured, breed, birth_date) VALUES (?, ?, ?, ?, 1, ?, ?, ?)";
             try (PreparedStatement pstmt = connection.prepareStatement(sqlPet)) {
                 pstmt.setInt(1, nextPetId);
-                pstmt.setString(2, txtOwnerName.getText().trim());
-                pstmt.setString(3, txtOwnerPhone.getText().trim());
-                pstmt.setString(4, txtPetName.getText().trim());
-                pstmt.setString(5, txtSpecies.getText().trim());
-                pstmt.setInt(6, isNeuturedVal); // Kısırlık bilgisi aktarıldı
-                pstmt.setString(7, txtBreed.getText().trim());
-                pstmt.setDate(8, java.sql.Date.valueOf(txtBirthDate.getText().trim()));
+                pstmt.setInt(2, ownerId);
+                pstmt.setString(3, txtPetName.getText().trim());
+                pstmt.setString(4, txtSpecies.getText().trim());
+                pstmt.setInt(5, isNeuturedVal); // Kısırlık bilgisi aktarıldı
+                pstmt.setString(6, txtBreed.getText().trim());
+                pstmt.setDate(7, java.sql.Date.valueOf(txtBirthDate.getText().trim()));
                 pstmt.executeUpdate();
             }
 
@@ -548,10 +550,11 @@ public class VetDatabaseApp extends JFrame {
 
         Runnable refresh = () -> {
             if (connection == null) return;
-            String sql = "SELECT a.appointment_id, p.owner_name, p.pet_name, v.name_surname AS vet_name, " +
+            String sql = "SELECT a.appointment_id, o.owner_name, p.pet_name, v.name_surname AS vet_name, " +
                          "a.appointment_date, a.appointment_time, a.reason " +
                          "FROM Appointments a " +
                          "JOIN Pets p ON a.pet_id = p.pet_id " +
+                         "JOIN Owners o ON p.owner_id = o.owner_id " +
                          "JOIN Vet v ON a.vet_id = v.vet_id " +
                          "ORDER BY a.appointment_date, a.appointment_time";
             try (Statement stmt = connection.createStatement();
@@ -649,6 +652,28 @@ public class VetDatabaseApp extends JFrame {
         return maxId + 1;
     }
 
+    /** Aynı ad+telefonlu sahip varsa onun owner_id'sini döndürür, yoksa Owners'a ekler. */
+    private int findOrCreateOwner(String name, String phone) throws SQLException {
+        String find = "SELECT owner_id FROM Owners WHERE owner_name = ? AND owner_phone = ? LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(find)) {
+            ps.setString(1, name);
+            ps.setString(2, phone);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        }
+        String insert = "INSERT INTO Owners (owner_name, owner_phone) VALUES (?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, name);
+            ps.setString(2, phone);
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                keys.next();
+                return keys.getInt(1);
+            }
+        }
+    }
+
     private String generateSummary(String examType) {
         switch (examType) {
             case "General Checkup":
@@ -667,11 +692,12 @@ public class VetDatabaseApp extends JFrame {
     }
 
     private void loadTreatmentResult(int treatmentId) {
-        String sql = "SELECT t.treatment_id, p.owner_name, p.pet_name, p.species, " +
+        String sql = "SELECT t.treatment_id, o.owner_name, p.pet_name, p.species, " +
                      "v.name_surname AS vet_name, a.appointment_date, a.appointment_time, t.exam_type, t.cost, t.summary " +
                      "FROM Treatments t " +
                      "JOIN Appointments a ON t.appointment_id = a.appointment_id " +
                      "JOIN Pets p ON a.pet_id = p.pet_id " +
+                     "JOIN Owners o ON p.owner_id = o.owner_id " +
                      "JOIN Vet v ON a.vet_id = v.vet_id " +
                      "WHERE t.treatment_id = ?";
 
